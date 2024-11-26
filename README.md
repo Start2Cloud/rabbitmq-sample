@@ -7,4 +7,8 @@ Rabbitmq-sample
 
 python -m pip install pika --upgrade
 
+4. 安裝 mysql 
+
+pip install mysql-connector-python
+
 
