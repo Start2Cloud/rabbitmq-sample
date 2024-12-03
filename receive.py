@@ -5,20 +5,19 @@ import pika
 
 # Default test host in GTM is 172.16.1.57
 # Web UI http://172.16.1.57:15672/#/
-RABBITMQ_HOST = '172.16.1.57'
+RABBITMQ_URL = 'your-broker-url.mq.region.amazonaws.com'
 # default port is 5672
-RABBITMQ_PORT = 5672
-
-# Default user and password is guest and you can do everything for dev
-#RABBITMQ_USER = 'guest'
-#RABBITMQ_PWD  = 'guest'
+RABBITMQ_PORT = 5671
 
 # gient_dev_sender is only send to Exange giant.direct for permission sample
-RABBITMQ_USER = 'gient_dev_sender'
-RABBITMQ_PWD  = 'gient_dev_sender'
+RABBITMQ_USER = 'your_username'
+RABBITMQ_PWD  = 'your_password'
 
 # default virtual host 
 RABBITMQ_VIRTUALHOST = '/'
+
+# 创建连接字符串
+AMQP_URL = f"amqps://{RABBITMQ_USER}:{RABBITMQ_PWD}@{RABBITMQ_URL}:{RABBITMQ_PORT}"
 
 # Message acknowledgment
 # 為了要確保message一定能收到(ex. consumer dies), ack設定在worker必須回傳delivery_tag,
@@ -59,15 +58,16 @@ def callback(ch, method, properties, body):
 while True:
     try:
         # create connection
-        connection = pika.BlockingConnection(pika.ConnectionParameters(RABBITMQ_HOST))
+        parameters = pika.URLParameters(AMQP_URL)
+        connection = pika.BlockingConnection(parameters) 
         channel = connection.channel()
         queue_name = 'giant.direct.queue-1'
         
         # Check queue
         channel.queue_declare(queue_name, durable = True,
             arguments={
-                "x-dead-letter-exchange" : "giant.dead",
-                "x-queue-type" : "quorum"
+            #    "x-dead-letter-exchange" : "giant.dead",
+            #    "x-queue-type" : "quorum"
             #  "x-dead-letter-routing-key" : "dl", # if not specified, queue's routing-key is used
             }
         )
